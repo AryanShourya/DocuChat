@@ -4,8 +4,8 @@ from app.config import settings
 
 # The engine
 engine = create_async_engine(
-    settings.DATABASE_URL,
-    settings.DEBUG
+    url= settings.DATABASE_URL,
+    echo=settings.DEBUG,
 )
 
 # session factory
