@@ -2,7 +2,8 @@ from fastapi import FastAPI
 from app.config import settings
 from contextlib import asynccontextmanager
 from app.db.session import engine, Base 
-import app.models.document
+from app.routers import documents
+import app.models.document  # import this to avoid error
 
 
 @asynccontextmanager
@@ -24,6 +25,12 @@ app = FastAPI(
     debug = settings.DEBUG,
     lifespan=lifespan,
 )
+
+
+# ---------- Routers --------
+app.include_router(documents.router)
+
+
 
 @app.get("/")
 async def root():
