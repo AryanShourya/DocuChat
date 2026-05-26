@@ -5,6 +5,7 @@ from sqlalchemy import select
 from app.db.session import get_db
 from app.models.document import Document
 from app.schemas.document import DocumentCreate, DocumentResponse
+from app.auth import get_current_user
 
 
 router = APIRouter(
@@ -12,26 +13,30 @@ router = APIRouter(
     tags=["documents"],
 )
 
-# list all the documents
+# list all the documents (current user's)
 @router.get("/",response_model=list[DocumentResponse])
 async def list_documents(
     db: AsyncSession = Depends(get_db),
+    user_id: str = Depends(get_current_user),
 ):
-    result = await db.execute(select(Document))
+    result = await db.execute(
+        select(Document).where(Document.user_id == user_id)
+        )
     documents = result.scalars().all()
     return documents
 
 
 
-# ---------- create a document record -----
+# ---------- create a document record ----- (current user)
 @router.post("/",response_model=DocumentResponse, status_code=status.HTTP_201_CREATED)
 async def create_document(
     payload : DocumentCreate,
     db: AsyncSession = Depends(get_db),
+    user_id: str = Depends(get_current_user),
 ):
     
     document = Document(
-        user_id = payload.user_id,
+        user_id = user_id,
         filename = payload.filename,
         file_path = f"uploads/{payload.filename}",
         file_size = payload.file_size,
@@ -44,15 +49,19 @@ async def create_document(
     return document
 
 
-# --------- get a single document ----------
+# --------- get a single document ---------- (current user's)
 @router.get("/{doc_id}", response_model=DocumentResponse)
 async def get_document(
     doc_id : int,
     db: AsyncSession = Depends(get_db),
+    user_id: str = Depends(get_current_user),
 ):
     
     result = await db.execute(
-        select(Document).where(Document.id == doc_id)
+        select(Document).where(
+            Document.id == doc_id,
+            Document.user_id == user_id,
+            )
     )
 
     document = result.scalars().first()

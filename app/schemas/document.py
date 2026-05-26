@@ -6,8 +6,7 @@ from pydantic import BaseModel
 # API caller sends when creating a document
 class DocumentCreate(BaseModel):
     filename: str
-    file_size: int 
-    user_id: str 
+    file_size: int  
 
 
 # API return includes DB generated fields
