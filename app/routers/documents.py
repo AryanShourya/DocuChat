@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException, status 
+import os 
+import shutil
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile 
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
@@ -6,12 +8,23 @@ from app.db.session import get_db
 from app.models.document import Document
 from app.schemas.document import DocumentCreate, DocumentResponse
 from app.auth import get_current_user
+from app.config import settings
+from app.services.ingestion import ingest_document
 
 
 router = APIRouter(
     prefix="/documents",
     tags=["documents"],
 )
+
+# Allowed file tyeps
+ALLOWED_EXTENSIONS = {".pdf",".docx"}
+MAX_FILE_SIZE = settings.MAX_FILE_SIZE_MB * 1024 * 1024 #covert MB to byte
+
+# ---- upload a document ------
+@router.post("/upload",response_model=DocumentResponse,status_code=status.HTTP_201_CREATED)
+
+
 
 # list all the documents (current user's)
 @router.get("/",response_model=list[DocumentResponse])
