@@ -14,6 +14,7 @@ __pycache__/
 # Database file (we'll use SQLite locally)
 *.db
 *.sqlite3
+chroma_db/
 
 # Uploaded files
 uploads/
