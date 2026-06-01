@@ -6,6 +6,7 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from sentence_transformers import SentenceTransformer
 import chromadb
 from chromadb.config import Settings as ChromaSettings
+from sqlalchemy import update
 
 from app.config import settings
 
@@ -151,13 +152,17 @@ async def ingest_document(
 
         # -- STEP - 5: Update document status in DB -----
         async with AsyncSessionLocal() as db:
-            result = await db.execute(
-                select(Document).where(Document.id == doc_id)
-            )
-            document = result.scalars().first()
-            if document:
-                document.status = "processed"
-                await db.commit()
+            async with db.begin():
+                await db.execute(
+                    #select(Document).where(Document.id == doc_id)
+                    update(Document)
+                    .where(Document.id == doc_id)
+                    .values(status="processed")
+                )
+                # document = result.scalars().first()
+                # if document:
+                #     document.status = "processed"
+                    # await db.commit()
 
         print(f"Document {doc_id} ingestion complete.")
 
@@ -166,10 +171,14 @@ async def ingest_document(
         # update status to failed
 
         async with AsyncSessionLocal() as db:
-            result = await db.execute(
-                select(Document).where(Document.id == doc_id)
-            )
-            document = result.scalars().first()
-            if document:
-                document.status = "failed"
-                await db.commit()
+            async with db.begin():
+                await db.execute(
+                    # select(Document).where(Document.id == doc_id)
+                    update(Document)
+                    .where(Document.id == doc_id)
+                    .values(status="failed")
+                )
+                # document = result.scalars().first()
+                # if document:
+                #     document.status = "failed"
+                
