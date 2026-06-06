@@ -79,7 +79,7 @@ def build_prompt(
     }
 
     #Build messages: system + history + current question
-    message = [system_message]
+    messages = [system_message]
 
     # add conversation history
     for msg in history:
